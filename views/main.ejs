@@ -1,0 +1,28 @@
+<html>
+	<h1>Welcome to your personal account page</h1>
+	<h2>Account Info</h2>
+	<ul>
+		<li>Name: <%= _userName %></li>
+		<li>Account Number: <%= _accountNumber %></li>
+		<li>Balance: <%= _accountBalance %></li>
+	</ul>
+	
+	<h2>Deposit Money</h2>
+	<form action="http://localhost:3000/deposit" method="POST">
+		Amount: <input type="text">
+		<input type="submit" value="Deposit">
+	</form>
+	
+	<h2>Withdraw Money</h2>
+	<form action="http://localhost:3000/withdraw" method="POST">
+		Amount: <input type="text">
+		<input type="submit" value="Withdraw">
+	</form>
+	
+	<h2>Transfer Money</h2>
+	<form action="http://localhost:3000/transfer" method="POST">
+		Amount: <input type="text"> <br />
+		To Account: <input type="text">
+		<input type="submit" value="Transfer">
+	</form>
+</html>

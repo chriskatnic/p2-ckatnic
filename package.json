@@ -1,0 +1,24 @@
+{
+  "name": "p2-ckatnic",
+  "version": "1.0.0",
+  "description": "banking application",
+  "main": "bank.js",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.10",
+    "npm": "^6.8.0"
+  },
+  "bundledDependencies": [
+    "ejs",
+    "express",
+    "nodemon",
+    "npm"
+  ],
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
