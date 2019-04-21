@@ -12,8 +12,10 @@ npm install
 then, execute the following command to run the application
 nodemon bank.js
 
+Among other features in the application...
 
 Security Countermeasures
+
 Broken Authentication
 - No default credentials are shipped with the application
 - Password checks for registering passwords: front end form field validation pattern match requires 15 character minimum mix of chars
@@ -21,8 +23,12 @@ Broken Authentication
 - Brute force attack countermeasure: failed login attempts are logged on the back end using the cookie session id
 
 XSS Attacks
-- Escaping and Sanitization: 
+- Escaping and Sanitization
 - username and password for login escaped when submitted before being compared against db
 - any amount submitted for withdrawal/deposit escaped/sanitized before writing/reading to/from db
 - regex pattern matching for front end field submissions help to disallow unacceptable submission formats for all contexts
-	
+- Content Security Policy headers implemented help prevent non-localhost scripts from executing
+
+Session Management
+- Implemented back end session management with a three minute timeout, one minute timeout increase with activity
+- Implemented httpOnly for session cookie

@@ -41,9 +41,9 @@ app.use(csp({
 
 app.use(session({
 	cookieName: 'session',
-	secret: 'aJuq39pyyyKjLJuYf',
+	secret: 'aJuq39pyyyKjLJuYfDE1qsdi6',
 	duration: 3 * 60 * 1000, /* three minutes */
-	activeDuration: 1 * 60 * 1000,
+	activeDuration: 1 * 60 * 10,
 	httpOnly: true,
 	ephemeral: true
 }));
@@ -68,6 +68,7 @@ function parseXMLDataForTag(xmlData, tagName)
 	return nodeValue;
 }
 
+// validation helper function - currently only first condition is used, can be extended
 function validate(value, criteria) {
 	if (criteria === "number")
 		return !isNaN(value);
@@ -77,6 +78,7 @@ function validate(value, criteria) {
 	return false;
 }
 
+// user checking helper function
 function userExists(username) {
 	// Read the file
 	fs.readFile("db.txt", "utf8", function(error, data){
@@ -104,6 +106,7 @@ function userExists(username) {
 	});
 }
 
+// html 'template' function - updates login form with error message
 function constructHTMLWithError(html) 
 {
 	// read file synchronously to ensure we don't continue on until it's read
@@ -133,7 +136,6 @@ function addToLog(message)
 app.use(function(req, res, next) {
 	if(req.session && req.session.user) {
 		if(!userExists(req.session.user)) {
-			console.log("user " + req.session.user + " logged in");
 			req.user = req.session.user
 			delete req.user.password;
 			req.session.user = req.user;
@@ -432,15 +434,23 @@ app.post("/register", function(req, res){
 
 	console.log(req.body);
 	
+	var user = [];
+	
 	// escape the user submitted data
-	var username = req.sanitize(req.body.username_register);
-	var password = req.sanitize(req.body.password_register);
+	user[0] = req.sanitize(req.body.username_register);
+	user[1] = req.sanitize(req.body.password_register);
+	user[2] = req.sanitize(req.body.firstname_register);
+	user[3] = req.sanitize(req.body.lastname_register);
+	user[4] = req.sanitize(req.body.address_register);
+	
+	// join registration data into single ; delimited string
+	let userJoined = user.join(";");
 	
 	// Append the entry to the text database	
-	fs.appendFile("db.txt", username + ";" + password + "\n", 
+	fs.appendFile("db.txt", userJoined + "\n", 
 	function(err)
 	{
-		fs.writeFile(username+".txt", "0.00", function(err){
+		fs.writeFile(user[0]+".txt", "0.00", function(err){
 			console.log("new file registered and account created");
 			res.redirect('/index');
 		});
@@ -451,7 +461,7 @@ app.post("/register", function(req, res){
 
 // GET '/' 
 // 
-// Should return index.html
+// Should return route request based on session cookie
 //
 // req = the request
 // resp = the response
@@ -476,7 +486,7 @@ app.get('/', function(req, res) {
 	}
 });
 
-// GET '/' 
+// GET '/index' 
 // 
 // Should return index.html
 //
