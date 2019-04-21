@@ -4,10 +4,15 @@
   "description": "banking application",
   "main": "bank.js",
   "dependencies": {
+    "cookie-parser": "^1.4.4",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
-    "nodemon": "^1.18.10",
-    "npm": "^6.8.0"
+    "express-sanitizer": "^1.0.5",
+    "helmet-csp": "^2.7.1",
+    "nodemon": "^1.18.11",
+    "npm": "^6.8.0",
+    "xml2js": "^0.4.19",
+    "xss-filters": "^1.2.7"
   },
   "bundledDependencies": [
     "ejs",

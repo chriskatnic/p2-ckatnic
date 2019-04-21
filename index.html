@@ -1,15 +1,24 @@
 <html>
+<head>
+<style>
+	h3 {color:red;}
+</style>
+</head>
+	<h3><errorMessage></h3>
 	<h1>Welcome back to the best bank</h1>
 	<form action="http://localhost:3000/login" method="POST">
-		Username: <input type="text" id="username_login"> <br />
-		Password: <input type="text" id="password_login"> <br />
+		Username: <input type="text" name="username_login"> <br />
+		Password: <input type="text" name="password_login"> <br />
 		<input type="submit" value="Sign in">
 	</form>
 
 	<h1>First time user?</h1>
+	Please enter a username and password to use <br />
+	Username rules: only letters, numbers,and '-' or '.'
+	Password rules: 15 character minimum, mix of uppercase, lowercase, and numbers
 	<form action="http://localhost:3000/register" method="POST">
-		Username: <input type="text" id="username_register"> <br />
-		Password: <input type="text" id="password_register"> <br />
+		Username: <input type="text" name="username_register" pattern="^[a-zA-Z0-9\.\-]+$"> <br />
+		Password: <input type="password" name="password_register" pattern="^[a-zA-Z0-9]{15,}$"> <br />
 		<input type="submit" value="Register">
 	</form>
 	<br /> <br />
