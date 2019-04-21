@@ -4,6 +4,7 @@
   "description": "banking application",
   "main": "bank.js",
   "dependencies": {
+    "client-sessions": "^0.8.0",
     "cookie-parser": "^1.4.4",
     "ejs": "^2.6.1",
     "express": "^4.16.4",

@@ -5,6 +5,7 @@ var csp = require('helmet-csp');
 var fs = require('fs');
 var bodyParser = require("body-parser");
 var expressSanitizer = require('express-sanitizer');
+var session = require('client-sessions');
 
 var app = express();
 
@@ -38,6 +39,14 @@ app.use(csp({
     //workerSrc: false  // This is not set.
   }}))
 
+app.use(session({
+	cookieName: 'session',
+	secret: 'aJuq39pyyyKjLJuYf',
+	duration: 3 * 60 * 1000, /* three minutes */
+	activeDuration: 1 * 60 * 1000,
+	httpOnly: true,
+	ephemeral: true
+}));
 
 // Parses a database of usernames and passwords
 // @param dbFile - the database file
@@ -83,10 +92,11 @@ function userExists(username) {
 		{ 
 			// Get the user name and password 
 			let userNameFromDB = tokenizedData[i].split(";")[0];
-			
+			console.log(userNameFromDB + username);
 			// Check the user name
-			if(username == userNameFromDB)
+			if(username === userNameFromDB)
 			{
+				console.log("returning true");
 				return true;
 			}
 		}
@@ -119,13 +129,36 @@ function addToLog(message)
 
 }
 
-app.get('/home', function(req, res) {
-
-	// check for cookie
-	if(req.cookies.loggedIn === undefined){
-		res.redirect('/');
+// middleware for session checking
+app.use(function(req, res, next) {
+	if(req.session && req.session.user) {
+		if(!userExists(req.session.user)) {
+			console.log("user " + req.session.user + " logged in");
+			req.user = req.session.user
+			delete req.user.password;
+			req.session.user = req.user;
+			res.locals.user = req.user;
+		}
+		next();
+	} else {
+		next();
 	}
-	
+});
+			
+
+// middleware for login required
+function requireLogin ( req, res, next) {
+	if(!req.user) {
+		console.log("login required!");
+		res.redirect('/'); 
+	} else {
+		console.log("login not required!");
+		next(); 
+	}
+};
+
+
+app.get('/home', requireLogin, function(req, res) {	
 	
 	// display the home page
 	var homePageHTML = "";
@@ -134,7 +167,7 @@ app.get('/home', function(req, res) {
 	var homePageAccountTableHTML = "<table>";
 	
 	// get the username from the cookie
-	var cookie = req.cookies.loggedIn;
+	var cookie = req.session.user;
 	
 	// validate the username exists and matches with the cookie
 	let userNameXML = cookie;
@@ -176,7 +209,7 @@ app.get('/home', function(req, res) {
 
 app.get("/logout", function(req, res) {
 	console.log("logging out");
-	res.clearCookie("loggedIn");
+	req.session.reset();
 	res.redirect("/index");
 
 });
@@ -188,7 +221,7 @@ app.post("/createAccount", function(req, res){
 
 	console.log("creating new account");
 	
-	let userName = req.cookies.loggedIn;
+	let userName = req.session.user;
 	
 	console.log(userName);
 	
@@ -213,7 +246,7 @@ app.post("/transaction", function(req, res){
 	
 	console.log("updating account value");
 
-	var cookie = req.cookies.loggedIn;
+	var cookie = req.session.user;
 	
 	let userNameXML = cookie;
 	
@@ -318,25 +351,7 @@ app.post("/transaction", function(req, res){
 // @param res - the response 
 app.post("/login", function(req, res){
 	
-	console.log("Logging in!");	
-		
-	var cookie = req.cookies.session_id;
-	
-	if (cookie === undefined)
-	{
-		console.log("cookie undefined");
-		
-		var randomNumber = Math.random().toString();
-		
-		randomNumber = randomNumber.substring(2, randomNumber.length);
-		
-		// set the cookie's age to 3 minutes
-    	res.cookie('session_id',randomNumber, { expire: 180000 + Date.now()});
-    	
-    	addToLog("INFO: New Session - " + randomNumber);
-		
-	}
-		
+	console.log("Logging in!");			
 		// Read the file
 		fs.readFile("db.txt", "utf8", function(error, data){
 			
@@ -371,12 +386,8 @@ app.post("/login", function(req, res){
 					credMath = true;
 					
 					addToLog("INFO: Successful Login - " + userName);
-					
-					// set the cookie to not need to log in again for 3 minutes
-					var cookieLoggedIn = req.sanitize(req.cookies.loggedIn);
-					
-					res.cookie("loggedIn", userName, {expire: 180000 + Date.now()});
-					
+
+					req.session.user = userName;
 					addToLog("INFO: Login Cookie Set - " + userName);
 				}
 				
@@ -447,14 +458,21 @@ app.post("/register", function(req, res){
 app.get('/', function(req, res) {
 	
 	// check for cookie
-	var cookie = req.cookies.loggedIn;
-	
-	if(cookie === undefined){
-		console.log("cookie undefined");
+//	var cookie = req.cookies.loggedIn;
+//	
+//	if(cookie === undefined){
+//		console.log("cookie undefined");
+//		res.redirect('/index');
+//	}else{
+//		console.log("cookie defined");
+//		res.redirect('/home');
+//	}
+	if(req.session && req.session.user){
+			res.redirect('/home');
+	} 
+	else 
+	{
 		res.redirect('/index');
-	}else{
-		console.log("cookie defined");
-		res.redirect('/home');
 	}
 });
 
