@@ -124,3 +124,7 @@ dist
 
 log.txt
 
+.settings/org.eclipse.wst.jsdt.ui.superType.name
+.settings/.jsdtscope
+.settings/org.eclipse.wst.jsdt.ui.superType.container
+.project

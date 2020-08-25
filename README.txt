@@ -15,3 +15,5 @@ npm run server
 sometimes windows can't see nodemon, so install globally.
 
 app listens on port 3000
+
+look in the windows details .docx for database details for mariadb/mysql

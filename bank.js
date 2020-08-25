@@ -27,6 +27,8 @@ var conn = mysql.createConnection({
     multipleStatements: true
 
 });
+
+
 var errorMessage = "";
 
 // Needed to parse the request body
@@ -69,25 +71,6 @@ app.use(session({
     ephemeral: true
 }));
 
-// Parses a database of usernames and passwords
-// @param dbFile - the database file
-// @return - the list of user name and passwords
-function parseDB(dbFile) {
-    'use strict';
-    // Read the file
-    fs.readFile(dbFile, "utf8", function (error, data) {
-        console.log(data);
-        data.split(";");
-
-    });
-}
-//
-//function parseXMLDataForTag(xmlData, tagName) {
-//    'use strict';
-//    var xmlParsed = xmlParser.parseFromString(xmlData, "text/xml");
-//    var nodeValue = xmlParsed.getElementsByTagName(tagName).childNodes[0].nodeValue;
-//    return nodeValue;
-//}
 
 // validation helper function - currently only first condition is used, can be extended
 function validate(value, criteria) {
@@ -491,3 +474,34 @@ https.createServer({
 
     console.log('listening... be sure to use "https://"!');
 });
+
+
+
+
+
+
+
+
+
+// OLD CODE
+
+
+//// Parses a database of usernames and passwords
+//// @param dbFile - the database file
+//// @return - the list of user name and passwords
+//function parseDB(dbFile) {
+//    'use strict';
+//    // Read the file
+//    fs.readFile(dbFile, "utf8", function (error, data) {
+//        console.log(data);
+//        data.split(";");
+//
+//    });
+//}
+//
+//function parseXMLDataForTag(xmlData, tagName) {
+//    'use strict';
+//    var xmlParsed = xmlParser.parseFromString(xmlData, "text/xml");
+//    var nodeValue = xmlParsed.getElementsByTagName(tagName).childNodes[0].nodeValue;
+//    return nodeValue;
+//}
