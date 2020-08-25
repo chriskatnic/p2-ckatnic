@@ -87,32 +87,6 @@ function validate(value, criteria) {
     return false;
 }
 
-// user checking helper function
-function userExists(username) {
-    'use strict';
-    // Read the file
-    fs.readFile("db.txt", "utf8", function (error, data) {
-
-        console.log("read account data: " + data);
-
-        // Split the data
-        var tokenizedData = data.split("\n");
-        console.log(tokenizedData);
-
-        // Try to find the name
-        for (let i = 0; i < tokenizedData.length; i++) {
-            // Get the user name and password 
-            let userNameFromDB = tokenizedData[i].split(";")[0];
-            console.log(userNameFromDB + username);
-            // Check the user name
-            if (username === userNameFromDB) {
-                console.log("returning true");
-                return true;
-            }
-        }
-        return false;
-    });
-}
 
 // html 'template' function - updates login form with error message
 function constructHTMLWithError(html) {
@@ -132,7 +106,7 @@ function constructHTMLWithError(html) {
 function addToLog(message) {
     'use strict';
     // Append the entry to the text database	
-    fs.appendFile("log.txt", Date.now() + " " + message + "\n",
+    fs.appendFile("logs/log.txt", Date.now() + " " + message + "\n",
         function (err) {
             console.log("wrote message in log: " + message);
         });
@@ -331,66 +305,93 @@ app.post("/login", function (req, res) {
 
     // execute sql statement
     conn.query(query, (err, result) => {
-
-        console.log(result[1]);
+    	
+    	if (err) throw err;
+      	
+    	
+        console.log(result[1].length);
 
         var hash;
+        
+        if (result[1].length > 0) {
+        	result[1].forEach(function (account) {
 
-        // find the username
-        result[1].forEach(function (account) {
+                if (account['username'] == userName) {
+                    // check password
+                    console.log("matched username...");
 
-            if (account['username'] == userName) {
-                // check password
-                console.log("matched username...");
+                    match = true;
 
-                match = true;
+                    // store the hashed password from the db
+                    hash = account['password'];
 
-                // store the hashed password from the db
-                hash = account['password'];
+                    if (match) {
+                        // compare stored hash with plaintext password using bcrypt	
+                        bcrypt.compare(password, hash, (err2, res2) => {
 
-                if (match) {
-                    // compare stored hash with plaintext password using bcrypt	
-                    bcrypt.compare(password, hash, (err2, res2) => {
+                            console.log("plaintext match: " + res2);
 
-                        console.log("plaintext match: " + res2);
+                            if (err2) throw err2;
 
-                        if (err2) throw err2;
+                            // store comparison results
+                            match = res2;
 
-                        // store comparison results
-                        match = res2;
+                            // store session information
+                            req.session.username = userName;
 
-                        // store session information
-                        req.session.username = userName;
+                            res.redirect("/home");
 
-                        res.redirect("/home");
+                        });
+                    } else {
+                        console.log("couldn't find match");
 
-                    });
-                } else {
-                    console.log("couldn't find match");
+                        addToLog("WARN: Login failed for " + req.body.userName);
 
-                    addToLog("WARN: Login failed for " + req.body.userName);
+                        errorMessage = "Login attempt failed";
 
-                    errorMessage = "Login attempt failed";
+                        var timeoutCounter = req.sanitize(req.cookies.timeoutCounter);
 
-                    var timeoutCounter = req.sanitize(req.cookies.timeoutCounter);
+                        console.log(timeoutCounter);
 
-                    console.log(timeoutCounter);
+                        if (timeoutCounter === undefined) {
+                            timeoutCounter = 0;
+                        }
 
-                    if (timeoutCounter === undefined) {
-                        timeoutCounter = 0;
+                        timeoutCounter = parseInt(timeoutCounter);
+                        timeoutCounter += 1;
+
+                        addToLog("WARN: Timeout Counter Increased - " + req.body.userName);
+
+                        res.cookie("timeoutCounter", timeoutCounter);
+                        res.send("invalid info");
+
                     }
-
-                    timeoutCounter = parseInt(timeoutCounter);
-                    timeoutCounter += 1;
-
-                    addToLog("WARN: Timeout Counter Increased - " + req.body.userName);
-
-                    res.cookie("timeoutCounter", timeoutCounter);
-                    res.send("invalid info");
-
                 }
+            });
+        } else {
+        	console.log("couldn't find match");
+
+            addToLog("WARN: Login failed for " + req.body.userName);
+
+            errorMessage = "Login attempt failed";
+
+            var timeoutCounter = req.sanitize(req.cookies.timeoutCounter);
+
+            console.log(timeoutCounter);
+
+            if (timeoutCounter === undefined) {
+                timeoutCounter = 0;
             }
-        });
+
+            timeoutCounter = parseInt(timeoutCounter);
+            timeoutCounter += 1;
+
+            addToLog("WARN: Timeout Counter Increased - " + req.body.userName);
+
+            res.cookie("timeoutCounter", timeoutCounter);
+            res.send("invalid info");
+        }
+        
 
     });
 
@@ -504,4 +505,31 @@ https.createServer({
 //    var xmlParsed = xmlParser.parseFromString(xmlData, "text/xml");
 //    var nodeValue = xmlParsed.getElementsByTagName(tagName).childNodes[0].nodeValue;
 //    return nodeValue;
+//}
+
+////user checking helper function
+//function userExists(username) {
+//  'use strict';
+//  // Read the file
+//  fs.readFile("db.txt", "utf8", function (error, data) {
+//
+//      console.log("read account data: " + data);
+//
+//      // Split the data
+//      var tokenizedData = data.split("\n");
+//      console.log(tokenizedData);
+//
+//      // Try to find the name
+//      for (let i = 0; i < tokenizedData.length; i++) {
+//          // Get the user name and password 
+//          let userNameFromDB = tokenizedData[i].split(";")[0];
+//          console.log(userNameFromDB + username);
+//          // Check the user name
+//          if (username === userNameFromDB) {
+//              console.log("returning true");
+//              return true;
+//          }
+//      }
+//      return false;
+//  });
 //}
